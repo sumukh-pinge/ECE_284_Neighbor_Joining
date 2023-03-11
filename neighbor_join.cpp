@@ -59,11 +59,13 @@ int readFromFile(double arr[MAX_TAXA][MAX_TAXA], char seq[MAX_TAXA], string file
     infile >> num_taxa;
     infile.peek();
     int numRows = 0, numCols = 0;
+    //Initialize Distance Matrix to 0
     for (int i = 0; i < num_taxa; i++) {
         for (int j = 0; j < num_taxa; j++) {
             arr[i][j] = 0;
         }
     }
+
     while (!infile.eof() && numRows < num_taxa) {
         numCols = 0;
 	    infile >> seq[numRows];
@@ -85,7 +87,12 @@ int readFromFile(double arr[MAX_TAXA][MAX_TAXA], char seq[MAX_TAXA], string file
 void printDistanceMatrix(double arr[MAX_TAXA][MAX_TAXA], int num_taxa, Node* nodes[MAX_TAXA]){
 	cout<< "Num_taxa = " << num_taxa <<endl;
     for (int i = 0; i < num_taxa; i++) {
-		cout<<"Seq "<<i<<" = "<<nodes[i]->node_name << " : ";
+        if(nodes[i]==nullptr)        {
+		    cout<<"Seq "<<i<<" = "<<"NULL" << " : ";
+        }
+        else {
+		    cout<<"Seq "<<i<<" = "<<nodes[i]->node_name << " : ";
+        }
         for (int j = 0; j < num_taxa; j++) {
             cout << arr[i][j] << " ";
         }
@@ -93,13 +100,13 @@ void printDistanceMatrix(double arr[MAX_TAXA][MAX_TAXA], int num_taxa, Node* nod
     }
 }
 
-void getRandomIndexes(int& random_number1, int& random_number2, int range ){
-    std::srand(std::time(nullptr));
-    random_number1 = std::rand() % range;
-    random_number2 = std::rand() % range;
-    if(random_number2==random_number1)
-        random_number2 = (random_number1 + 1) % range;
-}
+// void getRandomIndexes(int& random_number1, int& random_number2, int range ){
+//     std::srand(std::time(nullptr));
+//     random_number1 = std::rand() % range;
+//     random_number2 = std::rand() % range;
+//     if(random_number2==random_number1)
+//         random_number2 = (random_number1 + 1) % range;
+// }
 
 void traverseAndWrite(Node* node, ofstream& outfile) {
     if (node != NULL) {
@@ -124,37 +131,50 @@ void traverseAndWrite(Node* node, ofstream& outfile) {
     }
 }
 
+// Check for -1
 void totalDistance(double arr[MAX_TAXA][MAX_TAXA], int num_taxa, double TD_arr[MAX_TAXA]){
     for(int i=0; i<num_taxa; i++){
         double sum=0;
-        for (int k = 0; k < num_taxa; k++) {
-            sum += arr[i][k];
+        TD_arr[i] = -1;
+        if(arr[i][0]!=-1) {
+            for (int k = 0; k < num_taxa; k++) {
+                sum += arr[i][k];
+            }
+            TD_arr[i] = sum;
         }
-        TD_arr[i] = sum;
     }
 }
 
 /// @brief Calculate indexes with minimum D_star and store in array variable pair
-double find_closest_pair(double arr[MAX_TAXA][MAX_TAXA], int num_taxa, double TD_arr[MAX_TAXA], int& index1, int& index2) {
+// Check if -1
+void find_closest_pair(double arr[MAX_TAXA][MAX_TAXA], int num_taxa, double TD_arr[MAX_TAXA], int& index1, int& index2) {
     double min_distance = INT_MAX;
     for (int i = 0; i < num_taxa; i++) {
-        for (int j = i + 1; j < num_taxa; j++) {
-            double D_star = (num_taxa - 2) * arr[i][j] - TD_arr[i] - TD_arr[j];
-            if (D_star < min_distance) {
-                min_distance = D_star;
-                index1 = i;
-                index2 = j;
+        if(arr[i][0]!=-1) {
+            for (int j = i + 1; j < num_taxa; j++) {
+                if(arr[j][0]!=-1){
+                    double D_star = (num_taxa - 2) * arr[i][j] - TD_arr[i] - TD_arr[j];
+                    if (D_star < min_distance) {
+                        min_distance = D_star;
+                        index1 = i;
+                        index2 = j;
+                    }
+                }
             }
         }
     }
-    return min_distance / (num_taxa - 2);
+    //return min_distance / (num_taxa - 2);
 }
 
+//Pending
 void updateDistanceMatrix(double arr[MAX_TAXA][MAX_TAXA], int num_taxa, int min_index, int max_index) {
-    for(int k=0 ; k<num_taxa; k++)
-    {
-        double temp = (arr[min_index][k] + arr[max_index][k] - arr[min_index][max_index])/2.0;
+    for (int k = 0; k < num_taxa; k++) {
+        if (k != min_index && k != max_index) {
+            arr[max_index][k] = ( arr[min_index][k] + arr[max_index][k] - arr[min_index][max_index]) / 2;
+            arr[k][max_index] = arr[max_index][k];
+        }
     }
+    arr[min_index][0] = arr[0][min_index] = -1;
 }
 
 int main() {
@@ -172,27 +192,41 @@ int main() {
         //{Need to plug in neighbor joining below to get indexes
         int index1;
         int index2;
-        int n = num_taxa -i;
+        int n = num_taxa - i;
         //getRandomIndexes(index1, index2, n);
         totalDistance(arr, num_taxa, TD_arr);
-        find_closest_pair(arr,n, TD_arr, index1, index2);
+        find_closest_pair(arr,num_taxa, TD_arr, index1, index2);
         //}
         
         int min_index = min(index1, index2);
         int max_index = max(index1, index2);
-        double delta_ij = TD_arr[min_index] - TD_arr[max_index] / (n-2);
+        double delta_ij = (TD_arr[min_index] - TD_arr[max_index]) / (n-2);
         double limb_length_i = (arr[min_index][max_index] + delta_ij)/2.0;
         double limb_length_j = (arr[min_index][max_index] - delta_ij)/2.0;
+        updateDistanceMatrix(arr,num_taxa, min_index, max_index);
         string new_node_name = "(" + nodes[min_index]->node_name + nodes[max_index]->node_name + ")";
         cout<<new_node_name<<endl;
         Node* temp = new Node(new_node_name, nodes[min_index], nodes[max_index], limb_length_i, limb_length_j );
         nodes[max_index] = temp;
-        nodes[min_index] = nodes[n -1];
-        nodes[n-1] = nullptr;
+        nodes[min_index] = nullptr;
+        printDistanceMatrix(arr, num_taxa, nodes);
     }
-    string root_node_name = "(" + nodes[0]->node_name + nodes[1]->node_name + ")";
+    int final_index1 = -1;
+    int final_index2 = -1;
+
+    for(int i=0 ; i<num_taxa ; i++) {
+        if(arr[i][0]!=-1)
+        {
+            if(final_index1==-1)
+                final_index1 = i;
+            else
+                final_index2 = i;
+        }
+    } 
+
+    string root_node_name = "(" + nodes[final_index1]->node_name + nodes[final_index2]->node_name + ")";
     cout<<root_node_name<<endl;
-    Node* root = new Node(root_node_name, nodes[0], nodes[1], 10,20 );
+    Node* root = new Node(root_node_name, nodes[final_index1], nodes[final_index2], 10,20 );
 
     // cout<<nodes[0]->node_name<<" "<<nodes[1]->node_name;
     
