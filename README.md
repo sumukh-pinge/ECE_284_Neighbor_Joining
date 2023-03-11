@@ -4,7 +4,7 @@ Run the code using the command:
 
     g++ neighbor_join.cpp -o a.exe; ./a.exe
 
-Following this, run Graphviz using the below command on g.gv that is dumped from above command
+Following this, run Graphviz using the below command (g.gv dumped from the above command)
 
     dot -Tpng g.gv -o file.png
 
