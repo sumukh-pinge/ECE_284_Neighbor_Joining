@@ -2,7 +2,7 @@
 
 Running the code using the command:
 
-    g++ neighbor_join.cpp -o a.exe; ./a
+    g++ neighbor_join.cpp -o a.exe; ./a.exe
 
 Following this, I am running Graphviz using the below command
 
