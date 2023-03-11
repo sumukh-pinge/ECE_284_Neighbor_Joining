@@ -1,7 +1,7 @@
 # ECE_284_Neighbor_Joining
 
 Running the code using the command:
-  /g++ neighbor_join.cpp -o a.exe; ./a
+    /g++ neighbor_join.cpp -o a.exe; ./a
 
 Following this, I am running Graphviz using the below command
   dot -Tpng g.gv -o file.png
