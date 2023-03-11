@@ -100,6 +100,12 @@ void printDistanceMatrix(double arr[MAX_TAXA][MAX_TAXA], int num_taxa, Node* nod
     }
 }
 
+void printTDMatrix(double TD_arr[MAX_TAXA], int num_taxa){
+    for(int i=0 ; i<num_taxa; i++){
+        cout<<TD_arr[i] << " " ;
+    }
+    cout<<endl;
+}
 // void getRandomIndexes(int& random_number1, int& random_number2, int range ){
 //     std::srand(std::time(nullptr));
 //     random_number1 = std::rand() % range;
@@ -108,6 +114,7 @@ void printDistanceMatrix(double arr[MAX_TAXA][MAX_TAXA], int num_taxa, Node* nod
 //         random_number2 = (random_number1 + 1) % range;
 // }
 
+///brief To dump values from Tree into a text file for graph generation
 void traverseAndWrite(Node* node, ofstream& outfile) {
     if (node != NULL) {
         // Process the current node
@@ -131,14 +138,16 @@ void traverseAndWrite(Node* node, ofstream& outfile) {
     }
 }
 
-// Check for -1
+
 void totalDistance(double arr[MAX_TAXA][MAX_TAXA], int num_taxa, double TD_arr[MAX_TAXA]){
     for(int i=0; i<num_taxa; i++){
         double sum=0;
         TD_arr[i] = -1;
         if(arr[i][0]!=-1) {
             for (int k = 0; k < num_taxa; k++) {
-                sum += arr[i][k];
+                if(arr[k][0]!=-1){
+                    sum += arr[i][k];
+                }
             }
             TD_arr[i] = sum;
         }
@@ -195,6 +204,7 @@ int main() {
         int n = num_taxa - i;
         //getRandomIndexes(index1, index2, n);
         totalDistance(arr, num_taxa, TD_arr);
+        printTDMatrix(TD_arr, num_taxa);
         find_closest_pair(arr,num_taxa, TD_arr, index1, index2);
         //}
         
@@ -226,7 +236,7 @@ int main() {
 
     string root_node_name = "(" + nodes[final_index1]->node_name + nodes[final_index2]->node_name + ")";
     cout<<root_node_name<<endl;
-    Node* root = new Node(root_node_name, nodes[final_index1], nodes[final_index2], 10,20 );
+    Node* root = new Node(root_node_name, nodes[final_index1], nodes[final_index2], arr[final_index1][final_index2]/2.0, arr[final_index1][final_index2]/2.0 );
 
     // cout<<nodes[0]->node_name<<" "<<nodes[1]->node_name;
     
