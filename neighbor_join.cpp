@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iomanip>
+#include <climits>
 
 using namespace std;
 
