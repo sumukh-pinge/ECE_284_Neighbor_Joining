@@ -11,7 +11,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <iomanip>
-#include <climits>
 
 using namespace std;
 
@@ -67,10 +66,11 @@ int readFromFile(double arr[MAX_TAXA][MAX_TAXA], char seq[MAX_TAXA], string file
         }
     }
 
+    string s;
     while (!infile.eof() && numRows < num_taxa) {
         numCols = 0;
-	    infile >> seq[numRows];
-        nodes[numRows] = new Node({seq[numRows]});
+	    infile >> s;
+        nodes[numRows] = new Node(s);
 	    infile.peek();
         while (infile.peek() != '\n' && numCols < numRows) {
             infile >> arr[numRows][numCols];
@@ -189,7 +189,7 @@ void updateDistanceMatrix(double arr[MAX_TAXA][MAX_TAXA], int num_taxa, int min_
 
 int main() {
     
-    string file_name = "./examples/INGI2368.in";
+    string file_name = "./examples/Evolution.in";
     double arr[MAX_TAXA][MAX_TAXA];
     char seq[MAX_TAXA];
     Node* nodes[MAX_TAXA];
